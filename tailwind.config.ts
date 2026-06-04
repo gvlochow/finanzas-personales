@@ -12,7 +12,7 @@ const config: Config = {
         primary: "#46521F",
         income:  "#7B8A4A",
         expense: "#C46A3A",
-        dark:    "#2B2C24",
+        charcoal: "#2B2C24",
         cream:   "#F2E8D5",
       },
     },
