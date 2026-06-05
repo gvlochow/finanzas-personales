@@ -4,18 +4,23 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { supabase } from "@/lib/supabase";
 import { today } from "@/lib/utils";
-import { Category, PaymentMethod } from "@/types";
+import { Category, PaymentMethod, Transaction } from "@/types";
 import CategorySelector from "./CategorySelector";
 import AmountInput from "./AmountInput";
 
-export default function TransactionForm() {
+interface Props {
+  initialData?: Transaction;
+  onSave?: () => void;
+}
+
+export default function TransactionForm({ initialData, onSave }: Props = {}) {
   const router = useRouter();
-  const [type, setType] = useState<"expense" | "income">("expense");
-  const [date, setDate] = useState(today());
-  const [description, setDescription] = useState("");
-  const [categoryId, setCategoryId] = useState("");
-  const [paymentMethodId, setPaymentMethodId] = useState("");
-  const [amount, setAmount] = useState("");
+  const [type, setType] = useState<"expense" | "income">(initialData?.type ?? "expense");
+  const [date, setDate] = useState(initialData?.date ?? today());
+  const [description, setDescription] = useState(initialData?.description ?? "");
+  const [categoryId, setCategoryId] = useState(initialData?.category_id ?? "");
+  const [paymentMethodId, setPaymentMethodId] = useState(initialData?.payment_method_id ?? "");
+  const [amount, setAmount] = useState(initialData ? String(initialData.amount) : "");
   const [categories, setCategories] = useState<Category[]>([]);
   const [paymentMethods, setPaymentMethods] = useState<PaymentMethod[]>([]);
   const [loading, setLoading] = useState(false);
@@ -41,18 +46,24 @@ export default function TransactionForm() {
     setLoading(true);
     setError("");
 
-    const { error: err } = await supabase.from("transactions").insert({
+    const payload = {
       date,
       description: description || null,
       category_id: categoryId,
       payment_method_id: paymentMethodId || null,
       amount: parseInt(amount),
       type,
-    });
+    };
+
+    const { error: err } = initialData
+      ? await supabase.from("transactions").update(payload).eq("id", initialData.id)
+      : await supabase.from("transactions").insert(payload);
 
     setLoading(false);
     if (err) {
       setError("Error al guardar. Intenta de nuevo.");
+    } else if (onSave) {
+      onSave();
     } else {
       router.push("/transactions");
       router.refresh();
@@ -149,7 +160,7 @@ export default function TransactionForm() {
         disabled={loading}
         className="w-full py-3 bg-primary text-cream font-semibold rounded-xl hover:bg-primary/90 active:bg-primary/80 transition-colors disabled:opacity-50"
       >
-        {loading ? "Guardando..." : "Guardar transacción"}
+        {loading ? "Guardando..." : initialData ? "Actualizar transacción" : "Guardar transacción"}
       </button>
     </form>
   );
