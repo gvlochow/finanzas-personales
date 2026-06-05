@@ -77,7 +77,7 @@ export default function TransactionsPage() {
   );
 
   return (
-    <div className="p-4 space-y-4">
+    <div className="p-4 pb-24 space-y-4">
       <div className="pt-2">
         <h1 className="text-xl font-bold text-primary">Transacciones</h1>
       </div>
@@ -197,7 +197,7 @@ export default function TransactionsPage() {
 
       {/* Edit modal */}
       {editingTx && (
-        <div className="fixed inset-0 z-50 flex items-end">
+        <div className="fixed inset-0 z-[60] flex items-end">
           <div
             className="absolute inset-0 bg-black/40"
             onClick={() => setEditingTx(null)}
